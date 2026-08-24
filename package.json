@@ -1,0 +1,59 @@
+{
+  "name": "hospital-inventory",
+  "version": "1.0.0",
+  "description": "Hospital / Pharmacy Inventory System",
+  "author": "Hospital Inventory",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "start": "vite build && tsc -p tsconfig.electron.json && electron .",
+    "reset-password": "vite build && tsc -p tsconfig.electron.json && electron . --reset-auth",
+    "dev:react": "vite",
+    "dev:electron": "vite build && tsc -p tsconfig.electron.json && electron .",
+    "dev": "vite",
+    "build:react": "vite build",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "build": "tsc && vite build && npm run build:electron && electron-builder --win"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.8.0",
+    "lucide-react": "^0.469.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.7"
+  },
+  "build": {
+    "appId": "com.hospital.inventory",
+    "productName": "Hospital Inventory",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*"
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "**/node_modules/better-sqlite3/build/Release/*"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Hospital Inventory"
+    }
+  }
+}

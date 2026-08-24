@@ -1,0 +1,177 @@
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { DashboardView } from '../dashboard/DashboardView';
+import { ProductCatalogView } from '../inventory/ProductCatalogView';
+import { SupplierManagerView } from '../inventory/SupplierManagerView';
+import { PurchaseEntryView } from '../purchase/PurchaseEntryView';
+import { StockExitView } from '../stock/StockExitView';
+import { GstReportView } from '../reports/GstReportView';
+import { BackupSettingsView } from '../settings/BackupSettingsView';
+import {
+  Building2,
+  LayoutDashboard,
+  Package,
+  Truck,
+  FileText,
+  LogOut,
+  PieChart,
+  Settings,
+  ShieldCheck,
+  Clock,
+  Lock,
+  Calendar,
+} from 'lucide-react';
+
+export const AppLayout: React.FC = () => {
+  const { user, logout } = useAuth();
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'inventory' | 'suppliers' | 'purchases' | 'stock-exit' | 'reports' | 'settings'>('dashboard');
+  const [expiringSoonCount, setExpiringSoonCount] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchExpiryAlerts = async () => {
+      try {
+        if (window.electronAPI && window.electronAPI.batches) {
+          const batches = await window.electronAPI.batches.getAll();
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          let count = 0;
+          if (Array.isArray(batches)) {
+            for (const b of batches) {
+              if (b.current_stock <= 0) continue;
+              const expDate = new Date(b.expiry_date);
+              const diffDays = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+              if (diffDays <= 30) count++;
+            }
+          }
+          setExpiringSoonCount(count);
+        } else {
+          setExpiringSoonCount(1); // Preview fallback
+        }
+      } catch (err) {
+        console.error('Failed to fetch batch alerts:', err);
+      }
+    };
+    fetchExpiryAlerts();
+  }, [activeTab]);
+
+  const isMaster = user?.role === 'MASTER';
+
+  return (
+    <div className="app-shell">
+      {/* Narrow Desktop Sidebar */}
+      <aside className="app-sidebar">
+        <div className="sidebar-brand">
+          <Building2 size={20} />
+          <span>CRITICARE INVENTORY</span>
+        </div>
+
+        <nav className="sidebar-nav">
+          <button
+            className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
+            onClick={() => setActiveTab('dashboard')}
+          >
+            <LayoutDashboard size={17} />
+            <span>Dashboard</span>
+          </button>
+
+          <button
+            className={`nav-item ${activeTab === 'inventory' ? 'active' : ''}`}
+            onClick={() => setActiveTab('inventory')}
+          >
+            <Package size={17} />
+            <span>Product Inventory</span>
+          </button>
+
+          <button
+            className={`nav-item ${activeTab === 'purchases' ? 'active' : ''}`}
+            onClick={() => setActiveTab('purchases')}
+          >
+            <FileText size={17} />
+            <span>Purchase Entry</span>
+          </button>
+
+          <button
+            className={`nav-item ${activeTab === 'stock-exit' ? 'active' : ''}`}
+            onClick={() => setActiveTab('stock-exit')}
+          >
+            <LogOut size={17} color={isMaster ? '#38bdf8' : '#94a3b8'} />
+            <span>Stock Exit</span>
+            {!isMaster && (
+              <span className="nav-item-lock" title="Master Admin Only">
+                <Lock size={13} />
+              </span>
+            )}
+          </button>
+
+          <button
+            className={`nav-item ${activeTab === 'suppliers' ? 'active' : ''}`}
+            onClick={() => setActiveTab('suppliers')}
+          >
+            <Truck size={17} />
+            <span>Suppliers</span>
+          </button>
+
+          <button
+            className={`nav-item ${activeTab === 'reports' ? 'active' : ''}`}
+            onClick={() => setActiveTab('reports')}
+          >
+            <PieChart size={17} />
+            <span>GST Reports</span>
+          </button>
+
+          <button
+            className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`}
+            onClick={() => setActiveTab('settings')}
+          >
+            <Settings size={17} />
+            <span>Backup & Security</span>
+          </button>
+        </nav>
+
+        <div className="sidebar-footer">
+          <button className="sidebar-logout-btn" onClick={logout}>
+            <Lock size={15} />
+            <span>Lock / Logout</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* Main View Area */}
+      <div className="app-main">
+        <header className="app-topbar">
+          <div className="topbar-title">
+            <span>Hospital Pharmacy Inventory Management</span>
+          </div>
+
+          <div className="topbar-right">
+            {expiringSoonCount > 0 && (
+              <div
+                className="badge badge-warning"
+                style={{ cursor: 'pointer', padding: '0.35rem 0.65rem' }}
+                onClick={() => setActiveTab('reports')}
+              >
+                <Clock size={13} />
+                <span>{expiringSoonCount} Batches Expiring Soon</span>
+              </div>
+            )}
+
+            <div className={`user-badge-pill ${isMaster ? 'master' : 'staff'}`}>
+              <ShieldCheck size={14} />
+              <span>{isMaster ? 'MASTER ADMIN' : 'STAFF MODE'} ({user?.loginId || 'User'})</span>
+            </div>
+          </div>
+        </header>
+
+        <main className="app-viewport">
+          {activeTab === 'dashboard' && <DashboardView onNavigate={(tab) => setActiveTab(tab)} />}
+          {activeTab === 'inventory' && <ProductCatalogView />}
+          {activeTab === 'suppliers' && <SupplierManagerView />}
+          {activeTab === 'purchases' && <PurchaseEntryView />}
+          {activeTab === 'stock-exit' && <StockExitView />}
+          {activeTab === 'reports' && <GstReportView />}
+          {activeTab === 'settings' && <BackupSettingsView />}
+        </main>
+      </div>
+    </div>
+  );
+};

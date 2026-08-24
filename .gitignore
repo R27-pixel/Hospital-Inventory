@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Vite and TypeScript build output
+dist/
+dist-electron/
+
+# Electron Builder artifacts
+release/
+*.asar
+*.asar.unpacked/
+
+# Local application data
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+backups/
+
+# Logs and diagnostics
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Editor and OS files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+.DS_Store
+Thumbs.db
