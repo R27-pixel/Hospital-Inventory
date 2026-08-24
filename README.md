@@ -74,3 +74,9 @@ npm run build
 ```
 
 The installer and unpacked Windows application are written to `release/`.
+
+<img width="957" height="469" alt="image" src="https://github.com/user-attachments/assets/5017c55b-f89c-4300-bd4b-1eee1acc788f" />
+<img width="959" height="487" alt="image" src="https://github.com/user-attachments/assets/ff8ead7c-1a2c-454f-a9f1-6dcb1510b0b1" />
+<img width="954" height="499" alt="image" src="https://github.com/user-attachments/assets/2ba699a5-4314-4ecb-a98d-4722ae89e96f" />
+
+
