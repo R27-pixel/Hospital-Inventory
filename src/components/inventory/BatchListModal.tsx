@@ -41,20 +41,45 @@ export const BatchListModal: React.FC<BatchListModalProps> = ({ isOpen, product,
 
   if (!isOpen || !product) return null;
 
-  // Compute Expiry Status Pill
-  const getExpiryStatus = (expiryDateStr: string) => {
+  // Compute Expiry Status Pill & Days Remaining
+  const getExpiryInfo = (expiryDateStr: string) => {
+    if (!expiryDateStr) {
+      return { days_remaining: 0, status: 'NORMAL', label: 'NORMAL', css: 'badge-normal', icon: CheckCircle };
+    }
+
+    const str = expiryDateStr.trim();
+    let expDate: Date;
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+      const [y, m, d] = str.split('-').map((v) => parseInt(v, 10));
+      expDate = new Date(y, m - 1, d, 0, 0, 0, 0);
+    } else if (/^\d{2}\/\d{4}$/.test(str)) {
+      const [m, y] = str.split('/').map((v) => parseInt(v, 10));
+      expDate = new Date(y, m, 0, 0, 0, 0, 0);
+    } else if (/^\d{4}-\d{2}$/.test(str)) {
+      const [y, m] = str.split('-').map((v) => parseInt(v, 10));
+      expDate = new Date(y, m, 0, 0, 0, 0, 0);
+    } else {
+      expDate = new Date(str);
+      expDate.setHours(0, 0, 0, 0);
+    }
+
+    if (isNaN(expDate.getTime())) {
+      return { days_remaining: 0, status: 'NORMAL', label: 'NORMAL', css: 'badge-normal', icon: CheckCircle };
+    }
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const expDate = new Date(expiryDateStr);
-    const diffTime = expDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays < 0) {
-      return { status: 'EXPIRED', label: 'EXPIRED', css: 'badge-expired', icon: AlertTriangle };
-    } else if (diffDays <= 30) {
-      return { status: 'EXPIRING_SOON', label: `EXPIRING IN ${diffDays} DAYS`, css: 'badge-expiring-soon', icon: Clock };
+    const diffTime = expDate.getTime() - today.getTime();
+    const days_remaining = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+    if (days_remaining < 0) {
+      return { days_remaining, status: 'EXPIRED', label: 'EXPIRED', css: 'badge-expired', icon: AlertTriangle };
+    } else if (days_remaining <= 30) {
+      return { days_remaining, status: 'EXPIRING_SOON', label: 'EXPIRING SOON', css: 'badge-expiring-soon', icon: Clock };
     } else {
-      return { status: 'NORMAL', label: 'NORMAL', css: 'badge-normal', icon: CheckCircle };
+      return { days_remaining, status: 'NORMAL', label: 'NORMAL', css: 'badge-normal', icon: CheckCircle };
     }
   };
 
@@ -82,6 +107,7 @@ export const BatchListModal: React.FC<BatchListModalProps> = ({ isOpen, product,
                   <tr>
                     <th>Batch No</th>
                     <th>Expiry Date</th>
+                    <th>Days Remaining</th>
                     <th>Expiry Status</th>
                     <th>MRP</th>
                     <th>Purchase Rate</th>
@@ -91,13 +117,20 @@ export const BatchListModal: React.FC<BatchListModalProps> = ({ isOpen, product,
                 </thead>
                 <tbody>
                   {batches.map((b) => {
-                    const expInfo = getExpiryStatus(b.expiry_date);
+                    const expInfo = getExpiryInfo(b.expiry_date);
                     const ExpIcon = expInfo.icon;
                     const totalGstPct = (b.cgst_percent || 0) + (b.sgst_percent || 0) + (b.igst_percent || 0);
                     return (
                       <tr key={b.id}>
                         <td><strong>{b.batch_number}</strong></td>
                         <td>{b.expiry_date}</td>
+                        <td>
+                          {expInfo.days_remaining < 0 ? (
+                            <strong style={{ color: 'var(--danger)' }}>{expInfo.days_remaining} days</strong>
+                          ) : (
+                            <strong>{expInfo.days_remaining} days</strong>
+                          )}
+                        </td>
                         <td>
                           <span className={`status-pill ${expInfo.css}`}>
                             <ExpIcon size={12} />
@@ -118,7 +151,7 @@ export const BatchListModal: React.FC<BatchListModalProps> = ({ isOpen, product,
 
                   {batches.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="empty-table-cell">
+                      <td colSpan={8} className="empty-table-cell">
                         No batch entries registered for this product yet.
                       </td>
                     </tr>

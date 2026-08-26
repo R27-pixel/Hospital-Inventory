@@ -123,6 +123,7 @@ export interface GstClassSummary {
   total_taxable: number;
   total_cgst: number;
   total_sgst: number;
+  total_igst?: number;
   total_gst: number;
   grand_total: number;
   item_count: number;

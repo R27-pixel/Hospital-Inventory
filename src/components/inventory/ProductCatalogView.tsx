@@ -77,8 +77,27 @@ export const ProductCatalogView: React.FC = () => {
     let hasExpiringSoon = false;
 
     for (const b of pBatches) {
-      const expDate = new Date(b.expiry_date);
-      const diffDays = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      if (!b.expiry_date) continue;
+      const str = b.expiry_date.trim();
+      let expDate: Date;
+
+      if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+        const [y, m, d] = str.split('-').map((v) => parseInt(v, 10));
+        expDate = new Date(y, m - 1, d, 0, 0, 0, 0);
+      } else if (/^\d{2}\/\d{4}$/.test(str)) {
+        const [m, y] = str.split('/').map((v) => parseInt(v, 10));
+        expDate = new Date(y, m, 0, 0, 0, 0, 0);
+      } else if (/^\d{4}-\d{2}$/.test(str)) {
+        const [y, m] = str.split('-').map((v) => parseInt(v, 10));
+        expDate = new Date(y, m, 0, 0, 0, 0, 0);
+      } else {
+        expDate = new Date(str);
+        expDate.setHours(0, 0, 0, 0);
+      }
+
+      if (isNaN(expDate.getTime())) continue;
+
+      const diffDays = Math.round((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
       if (diffDays < 0) hasExpired = true;
       else if (diffDays <= 30) hasExpiringSoon = true;
     }

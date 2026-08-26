@@ -234,8 +234,8 @@ function registerIpcHandlers(): void {
   ipcMain.handle('stock:exit', (_event, data: { product_id: number; batch_id: number; quantity: number; reason: string }) => {
     if (!authManager || !dbService) return { success: false, error: 'Database service unavailable.' };
     const session = authManager.getActiveSession();
-    if (!session || session.role !== 'MASTER') {
-      return { success: false, error: 'Privileged Operation Denied: Stock Exit is restricted to Master Admin accounts.' };
+    if (!session) {
+      return { success: false, error: 'Unauthenticated: Please log in to proceed.' };
     }
     if (!data || !Number.isInteger(data.quantity) || data.quantity <= 0) {
       return { success: false, error: 'Invalid Exit Quantity: Quantity must be a positive integer.' };

@@ -37,10 +37,28 @@ export const AppLayout: React.FC = () => {
           let count = 0;
           if (Array.isArray(batches)) {
             for (const b of batches) {
-              if (b.current_stock <= 0) continue;
-              const expDate = new Date(b.expiry_date);
-              const diffDays = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-              if (diffDays <= 30) count++;
+              if (b.current_stock <= 0 || !b.expiry_date) continue;
+              const str = b.expiry_date.trim();
+              let expDate: Date;
+
+              if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+                const [y, m, d] = str.split('-').map((v) => parseInt(v, 10));
+                expDate = new Date(y, m - 1, d, 0, 0, 0, 0);
+              } else if (/^\d{2}\/\d{4}$/.test(str)) {
+                const [m, y] = str.split('/').map((v) => parseInt(v, 10));
+                expDate = new Date(y, m, 0, 0, 0, 0, 0);
+              } else if (/^\d{4}-\d{2}$/.test(str)) {
+                const [y, m] = str.split('-').map((v) => parseInt(v, 10));
+                expDate = new Date(y, m, 0, 0, 0, 0, 0);
+              } else {
+                expDate = new Date(str);
+                expDate.setHours(0, 0, 0, 0);
+              }
+
+              if (isNaN(expDate.getTime())) continue;
+
+              const diffDays = Math.round((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+              if (diffDays >= 0 && diffDays <= 30) count++;
             }
           }
           setExpiringSoonCount(count);
@@ -94,13 +112,8 @@ export const AppLayout: React.FC = () => {
             className={`nav-item ${activeTab === 'stock-exit' ? 'active' : ''}`}
             onClick={() => setActiveTab('stock-exit')}
           >
-            <LogOut size={17} color={isMaster ? '#38bdf8' : '#94a3b8'} />
+            <LogOut size={17} color="#38bdf8" />
             <span>Stock Exit</span>
-            {!isMaster && (
-              <span className="nav-item-lock" title="Master Admin Only">
-                <Lock size={13} />
-              </span>
-            )}
           </button>
 
           <button
@@ -148,7 +161,7 @@ export const AppLayout: React.FC = () => {
               <div
                 className="badge badge-warning"
                 style={{ cursor: 'pointer', padding: '0.35rem 0.65rem' }}
-                onClick={() => setActiveTab('reports')}
+                onClick={() => setActiveTab('inventory')}
               >
                 <Clock size={13} />
                 <span>{expiringSoonCount} Batches Expiring Soon</span>

@@ -270,6 +270,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                         className="form-input"
                         placeholder="63.63"
                         value={mrp}
+                        onFocus={(e) => e.target.select()}
                         onChange={(e) => setMrp(e.target.value ? Number(e.target.value) : '')}
                         required={includeInitialBatch}
                       />
@@ -283,6 +284,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                         className="form-input"
                         placeholder="60.00"
                         value={purchaseRate}
+                        onFocus={(e) => e.target.select()}
                         onChange={(e) => setPurchaseRate(e.target.value ? Number(e.target.value) : '')}
                         required={includeInitialBatch}
                       />
@@ -296,6 +298,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                         className="form-input"
                         placeholder="0.00"
                         value={discountPercent}
+                        onFocus={(e) => e.target.select()}
                         onChange={(e) => setDiscountPercent(e.target.value ? Number(e.target.value) : '')}
                       />
                     </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Supplier, Product, PurchaseItemInput, PurchaseInvoice } from '../../vite-env';
 import { useAuth } from '../../context/AuthContext';
 import { ProductFormModal } from '../inventory/ProductFormModal';
+import { SupplierFormModal } from '../inventory/SupplierFormModal';
 import { MasterDiscrepancyAuthModal } from './MasterDiscrepancyAuthModal';
 import {
   FileText,
@@ -48,29 +49,30 @@ export const PurchaseEntryView: React.FC = () => {
 
   // Modal States
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [isSupplierModalOpen, setIsSupplierModalOpen] = useState(false);
   const [isDiscrepancyModalOpen, setIsDiscrepancyModalOpen] = useState(false);
   const [pendingDiscrepancies, setPendingDiscrepancies] = useState<any[]>([]);
 
-  // Form Line Items State (Based on MAA VACCINE Invoice Format)
+  // Form Line Items State
   const [items, setItems] = useState<PurchaseItemInput[]>([
     {
-      product_name: 'TUBERVAC(BCG) 1 ML VIAL',
-      hsn_code: '30049099',
-      pack_size: '1 Vial',
-      manufacturer: 'SERUM',
-      batch_number: '0375MA009',
+      product_name: '',
+      hsn_code: '',
+      pack_size: '',
+      manufacturer: '',
+      batch_number: '',
       mfg_date: '',
-      expiry_date: '04/2027',
-      mrp: 85.56,
-      quantity: 10,
+      expiry_date: '',
+      mrp: 0,
+      quantity: 1,
       free_quantity: 0,
-      purchase_rate: 68.49,
+      purchase_rate: 0,
       discount_percent: 0,
       cgst_percent: 2.5,
       sgst_percent: 2.5,
       igst_percent: 0,
-      supplier_net_rate: 71.91,
-      supplier_line_amount: 719.15,
+      supplier_net_rate: 0,
+      supplier_line_amount: 0,
     },
   ]);
 
@@ -140,8 +142,31 @@ export const PurchaseEntryView: React.FC = () => {
   };
 
   const handleRemoveItem = (index: number) => {
-    if (items.length === 1) return;
-    setItems(items.filter((_, idx) => idx !== index));
+    if (items.length === 1) {
+      setItems([
+        {
+          product_name: '',
+          hsn_code: '',
+          pack_size: '',
+          manufacturer: '',
+          batch_number: '',
+          mfg_date: '',
+          expiry_date: '',
+          mrp: 0,
+          quantity: 1,
+          free_quantity: 0,
+          purchase_rate: 0,
+          discount_percent: 0,
+          cgst_percent: 2.5,
+          sgst_percent: 2.5,
+          igst_percent: 0,
+          supplier_net_rate: 0,
+          supplier_line_amount: 0,
+        },
+      ]);
+    } else {
+      setItems(items.filter((_, idx) => idx !== index));
+    }
   };
 
   const handleItemChange = (index: number, field: keyof PurchaseItemInput, value: any) => {
@@ -319,6 +344,27 @@ export const PurchaseEntryView: React.FC = () => {
       setRemarks('');
       setSupplierTaxableTotal('');
       setSupplierGrandTotal('');
+      setItems([
+        {
+          product_name: '',
+          hsn_code: '',
+          pack_size: '',
+          manufacturer: '',
+          batch_number: '',
+          mfg_date: '',
+          expiry_date: '',
+          mrp: 0,
+          quantity: 1,
+          free_quantity: 0,
+          purchase_rate: 0,
+          discount_percent: 0,
+          cgst_percent: 2.5,
+          sgst_percent: 2.5,
+          igst_percent: 0,
+          supplier_net_rate: 0,
+          supplier_line_amount: 0,
+        },
+      ]);
       await loadInitialData();
     } catch (err: any) {
       setError(err.message || 'Failed to submit purchase invoice.');
@@ -393,7 +439,18 @@ export const PurchaseEntryView: React.FC = () => {
               {/* Supplier & Invoice Form Fields */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.85rem' }}>
                 <div className="form-group">
-                  <label className="form-label">Supplier Vendor *</label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
+                    <label className="form-label" style={{ margin: 0 }}>Supplier Vendor *</label>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      style={{ padding: '0.1rem 0.35rem', fontSize: '0.74rem' }}
+                      onClick={() => setIsSupplierModalOpen(true)}
+                    >
+                      <Plus size={11} />
+                      <span>New Supplier</span>
+                    </button>
+                  </div>
                   <select
                     className="form-select"
                     value={supplierId}
@@ -672,6 +729,7 @@ export const PurchaseEntryView: React.FC = () => {
                             className="form-input"
                             style={{ height: '28px', padding: '0 0.4rem', fontSize: '0.8rem' }}
                             value={item.mrp}
+                            onFocus={(e) => e.target.select()}
                             onChange={(e) => handleItemChange(idx, 'mrp', Number(e.target.value))}
                             required
                           />
@@ -683,6 +741,7 @@ export const PurchaseEntryView: React.FC = () => {
                             className="form-input"
                             style={{ height: '28px', padding: '0 0.4rem', fontSize: '0.8rem' }}
                             value={item.purchase_rate}
+                            onFocus={(e) => e.target.select()}
                             onChange={(e) => handleItemChange(idx, 'purchase_rate', Number(e.target.value))}
                             required
                           />
@@ -694,6 +753,7 @@ export const PurchaseEntryView: React.FC = () => {
                             className="form-input"
                             style={{ height: '28px', padding: '0 0.4rem', fontSize: '0.8rem' }}
                             value={item.discount_percent}
+                            onFocus={(e) => e.target.select()}
                             onChange={(e) => handleItemChange(idx, 'discount_percent', Number(e.target.value))}
                           />
                         </td>
@@ -704,6 +764,7 @@ export const PurchaseEntryView: React.FC = () => {
                             className="form-input"
                             style={{ height: '28px', padding: '0 0.4rem', fontSize: '0.8rem' }}
                             value={item.sgst_percent}
+                            onFocus={(e) => e.target.select()}
                             onChange={(e) => handleItemChange(idx, 'sgst_percent', Number(e.target.value))}
                           />
                         </td>
@@ -714,6 +775,7 @@ export const PurchaseEntryView: React.FC = () => {
                             className="form-input"
                             style={{ height: '28px', padding: '0 0.4rem', fontSize: '0.8rem' }}
                             value={item.cgst_percent}
+                            onFocus={(e) => e.target.select()}
                             onChange={(e) => handleItemChange(idx, 'cgst_percent', Number(e.target.value))}
                           />
                         </td>
@@ -724,6 +786,7 @@ export const PurchaseEntryView: React.FC = () => {
                             className="form-input"
                             style={{ height: '28px', padding: '0 0.4rem', fontSize: '0.8rem' }}
                             value={item.igst_percent}
+                            onFocus={(e) => e.target.select()}
                             onChange={(e) => handleItemChange(idx, 'igst_percent', Number(e.target.value))}
                           />
                         </td>
@@ -735,6 +798,7 @@ export const PurchaseEntryView: React.FC = () => {
                             style={{ height: '28px', padding: '0 0.4rem', fontSize: '0.8rem' }}
                             placeholder={calcNetRate}
                             value={item.supplier_net_rate || ''}
+                            onFocus={(e) => e.target.select()}
                             onChange={(e) => handleItemChange(idx, 'supplier_net_rate', Number(e.target.value))}
                           />
                         </td>
@@ -746,6 +810,7 @@ export const PurchaseEntryView: React.FC = () => {
                             style={{ height: '28px', padding: '0 0.4rem', fontSize: '0.8rem', fontWeight: 600 }}
                             placeholder={netAmt.toFixed(2)}
                             value={item.supplier_line_amount || ''}
+                            onFocus={(e) => e.target.select()}
                             onChange={(e) => handleItemChange(idx, 'supplier_line_amount', Number(e.target.value))}
                           />
                         </td>
@@ -754,8 +819,7 @@ export const PurchaseEntryView: React.FC = () => {
                             type="button"
                             className="btn-icon"
                             onClick={() => handleRemoveItem(idx)}
-                            disabled={items.length === 1}
-                            title="Remove Row"
+                            title="Clear / Remove Row"
                           >
                             <Trash2 size={13} color="var(--danger)" />
                           </button>
@@ -987,6 +1051,19 @@ export const PurchaseEntryView: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Supplier Creation Modal Guard */}
+      <SupplierFormModal
+        isOpen={isSupplierModalOpen}
+        onClose={() => setIsSupplierModalOpen(false)}
+        onSuccess={async (newSupId) => {
+          if (window.electronAPI && window.electronAPI.suppliers) {
+            const sups = await window.electronAPI.suppliers.getAll();
+            setSuppliers(sups);
+          }
+          if (newSupId) setSupplierId(newSupId);
+        }}
+      />
 
       {/* Product Creation Modal Guard */}
       <ProductFormModal

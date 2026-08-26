@@ -25,6 +25,51 @@ export interface ExpiryReportItem {
   mrp: number;
 }
 
+export function calculateExpiryDetails(
+  expiryDateStr: string,
+  warningThresholdDays: number = 30
+): { days_remaining: number; status: 'EXPIRED' | 'EXPIRING_SOON' | 'NORMAL' } {
+  if (!expiryDateStr) {
+    return { days_remaining: 0, status: 'NORMAL' };
+  }
+
+  const str = expiryDateStr.trim();
+  let expDate: Date;
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+    const [y, m, d] = str.split('-').map((v) => parseInt(v, 10));
+    expDate = new Date(y, m - 1, d, 0, 0, 0, 0);
+  } else if (/^\d{2}\/\d{4}$/.test(str)) {
+    const [m, y] = str.split('/').map((v) => parseInt(v, 10));
+    expDate = new Date(y, m, 0, 0, 0, 0, 0);
+  } else if (/^\d{4}-\d{2}$/.test(str)) {
+    const [y, m] = str.split('-').map((v) => parseInt(v, 10));
+    expDate = new Date(y, m, 0, 0, 0, 0, 0);
+  } else {
+    expDate = new Date(str);
+    expDate.setHours(0, 0, 0, 0);
+  }
+
+  if (isNaN(expDate.getTime())) {
+    return { days_remaining: 0, status: 'NORMAL' };
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const diffTime = expDate.getTime() - today.getTime();
+  const days_remaining = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+  let status: 'EXPIRED' | 'EXPIRING_SOON' | 'NORMAL' = 'NORMAL';
+  if (days_remaining < 0) {
+    status = 'EXPIRED';
+  } else if (days_remaining <= warningThresholdDays) {
+    status = 'EXPIRING_SOON';
+  }
+
+  return { days_remaining, status };
+}
+
 export class ReportsDbService {
   private db: Database.Database;
 
@@ -64,28 +109,23 @@ export class ReportsDbService {
         b.batch_number,
         b.expiry_date,
         b.current_stock,
-        (b.mrp_paise / 100.0) AS mrp,
-        CAST(JULIANDAY(b.expiry_date) - JULIANDAY(DATE('now')) AS INTEGER) AS days_remaining
+        (b.mrp_paise / 100.0) AS mrp
       FROM batches b
       JOIN products p ON b.product_id = p.id
       WHERE b.current_stock > 0
       ORDER BY b.expiry_date ASC
     `;
 
-    const rows = this.db.prepare(query).all() as (ExpiryReportItem & { days_remaining: number })[];
+    const rows = this.db.prepare(query).all() as any[];
 
     return rows.map((r) => {
-      let status: 'EXPIRED' | 'EXPIRING_SOON' | 'NORMAL' = 'NORMAL';
-      if (r.days_remaining < 0) {
-        status = 'EXPIRED';
-      } else if (r.days_remaining <= 30) {
-        status = 'EXPIRING_SOON';
-      }
-
+      const { days_remaining, status } = calculateExpiryDetails(r.expiry_date);
       return {
         ...r,
+        days_remaining,
         status,
       };
     });
   }
 }
+

@@ -748,6 +748,13 @@ export class InventoryDbService {
           input.reason
         );
 
+        if (userId) {
+          this.db.prepare(`
+            INSERT INTO audit_logs (user_id, action, entity_type, entity_id, details)
+            VALUES (?, 'STOCK_EXIT', 'BATCH', ?, ?)
+          `).run(userId, input.batch_id, `Stock exit of ${input.quantity} units recorded for Batch ID ${input.batch_id}. Reason: ${input.reason}`);
+        }
+
         return newStock;
       });
 

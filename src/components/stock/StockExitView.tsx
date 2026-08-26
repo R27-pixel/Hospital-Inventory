@@ -91,11 +91,6 @@ export const StockExitView: React.FC = () => {
     setError(null);
     setSuccessMsg(null);
 
-    if (isStaff) {
-      setError('Privileged Feature: Stock Exit is restricted to Master Admin accounts.');
-      return;
-    }
-
     if (!selectedProductId || !selectedBatchId) {
       setError('Please select both a Product and a Batch.');
       return;
@@ -158,7 +153,7 @@ export const StockExitView: React.FC = () => {
       <div className="view-header">
         <div className="view-header-title">
           <h2>Outbound Stock Exit</h2>
-          <p>Record negative stock movements (issued, sold, or internal use) — Master Admin Restricted</p>
+          <p>Record negative stock movements (issued, sold, or internal use)</p>
         </div>
 
         <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -181,19 +176,7 @@ export const StockExitView: React.FC = () => {
 
       {activeTab === 'exit' && (
         <div className="card-surface" style={{ maxWidth: '750px', margin: '0 auto' }}>
-          {isStaff ? (
-            <div style={{ textAlign: 'center', padding: '2rem 1.5rem' }}>
-              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--warning-bg)', color: 'var(--warning)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
-                <Lock size={24} />
-              </div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.4rem' }}>Master Admin Only</h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', maxWidth: '450px', margin: '0 auto 1.5rem' }}>
-                Stock Exit operations record outbound inventory deduction and require Master Admin authorization. You are currently logged in under <strong>Staff Mode</strong>.
-              </p>
-              <span className="badge badge-warning">Restricted Feature</span>
-            </div>
-          ) : (
-            <form onSubmit={handleExecuteExit}>
+          <form onSubmit={handleExecuteExit}>
               <div className="card-title-bar">
                 <h3>
                   <LogOut size={18} className="danger" color="var(--danger)" />
@@ -356,7 +339,6 @@ export const StockExitView: React.FC = () => {
                 </button>
               </div>
             </form>
-          )}
         </div>
       )}
 
