@@ -12,6 +12,7 @@ export const BackupSettingsView: React.FC = () => {
 
   // Change Password state
   const [targetRole, setTargetRole] = useState<'STAFF' | 'MASTER'>(user?.role === 'MASTER' ? 'MASTER' : 'STAFF');
+  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [passMsg, setPassMsg] = useState<string | null>(null);
@@ -74,8 +75,8 @@ export const BackupSettingsView: React.FC = () => {
     setPassMsg(null);
     setPassErr(null);
 
-    if (newPassword.length < 6) {
-      setPassErr('New password must be at least 6 characters.');
+    if (newPassword.length < 8) {
+      setPassErr('New password must be at least 8 characters long.');
       return;
     }
 
@@ -87,7 +88,7 @@ export const BackupSettingsView: React.FC = () => {
     setChangingPass(true);
     try {
       if (window.electronAPI && window.electronAPI.auth) {
-        const res = await window.electronAPI.auth.changePassword({ targetRole, newPassword });
+        const res = await window.electronAPI.auth.changePassword({ targetRole, currentPassword, newPassword });
         if (!res.success) {
           setPassErr(res.error || 'Failed to update password.');
           return;
@@ -97,6 +98,7 @@ export const BackupSettingsView: React.FC = () => {
         setPassMsg(`Web Preview: Password for ${targetRole} updated!`);
       }
 
+      setCurrentPassword('');
       setNewPassword('');
       setConfirmNewPassword('');
     } catch (err: any) {
@@ -130,14 +132,14 @@ export const BackupSettingsView: React.FC = () => {
           </p>
 
           {backupErr && (
-            <div className="alert-banner error">
+            <div className="alert-banner error" data-testid="backup-error-alert">
               <AlertCircle size={16} />
               <span>{backupErr}</span>
             </div>
           )}
 
           {backupMsg && (
-            <div className="alert-banner" style={{ background: 'var(--success-bg)', border: '1px solid var(--success-border)', color: 'var(--success)' }}>
+            <div className="alert-banner" style={{ background: 'var(--success-bg)', border: '1px solid var(--success-border)', color: 'var(--success)' }} data-testid="backup-success-alert">
               <CheckCircle2 size={16} />
               <span>{backupMsg}</span>
             </div>
@@ -157,6 +159,7 @@ export const BackupSettingsView: React.FC = () => {
             onClick={handleTriggerBackup}
             disabled={isStaff}
             style={{ width: '100%' }}
+            data-testid="trigger-manual-backup-btn"
           >
             <Download size={16} />
             <span>{isStaff ? 'Manual Backup Restricted (Master Only)' : 'Trigger Instant Manual Backup'}</span>
@@ -172,16 +175,16 @@ export const BackupSettingsView: React.FC = () => {
             </h3>
           </div>
 
-          <form onSubmit={handleChangePassword} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+          <form onSubmit={handleChangePassword} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }} data-testid="change-password-form">
             {passErr && (
-              <div className="alert-banner error">
+              <div className="alert-banner error" data-testid="change-pass-error-alert">
                 <AlertCircle size={16} />
                 <span>{passErr}</span>
               </div>
             )}
 
             {passMsg && (
-              <div className="alert-banner" style={{ background: 'var(--success-bg)', border: '1px solid var(--success-border)', color: 'var(--success)' }}>
+              <div className="alert-banner" style={{ background: 'var(--success-bg)', border: '1px solid var(--success-border)', color: 'var(--success)' }} data-testid="change-pass-success-alert">
                 <CheckCircle2 size={16} />
                 <span>{passMsg}</span>
               </div>
@@ -194,6 +197,7 @@ export const BackupSettingsView: React.FC = () => {
                 value={targetRole}
                 onChange={(e) => setTargetRole(e.target.value as any)}
                 disabled={isStaff}
+                data-testid="change-pass-role-select"
               >
                 <option value="STAFF">STAFF Account</option>
                 {user?.role === 'MASTER' && <option value="MASTER">MASTER ADMIN Account</option>}
@@ -206,13 +210,27 @@ export const BackupSettingsView: React.FC = () => {
             </div>
 
             <div className="form-group">
+              <label className="form-label">Current Password *</label>
+              <input
+                type="password"
+                className="form-input"
+                placeholder="Enter current account password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                data-testid="change-pass-current-input"
+                required
+              />
+            </div>
+
+            <div className="form-group">
               <label className="form-label">New Password *</label>
               <input
                 type="password"
                 className="form-input"
-                placeholder="Min 6 characters"
+                placeholder="Min 8 characters"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
+                data-testid="change-pass-new-input"
                 required
               />
             </div>
@@ -225,11 +243,12 @@ export const BackupSettingsView: React.FC = () => {
                 placeholder="Re-enter new password"
                 value={confirmNewPassword}
                 onChange={(e) => setConfirmNewPassword(e.target.value)}
+                data-testid="change-pass-confirm-input"
                 required
               />
             </div>
 
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '0.25rem' }} disabled={changingPass}>
+            <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '0.25rem' }} disabled={changingPass} data-testid="change-pass-submit-btn">
               <ShieldCheck size={16} />
               <span>{changingPass ? 'Updating...' : `Update ${targetRole} Password`}</span>
             </button>

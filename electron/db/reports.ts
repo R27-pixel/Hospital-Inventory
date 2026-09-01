@@ -77,7 +77,10 @@ export class ReportsDbService {
     this.db = db;
   }
 
-  public getGstSummary(startDate: string, endDate: string): GstClassSummary[] {
+  public getGstSummary(startDate?: string, endDate?: string): GstClassSummary[] {
+    const start = (startDate && startDate.trim()) ? startDate : '1970-01-01';
+    const end = (endDate && endDate.trim()) ? endDate : '2099-12-31';
+
     const query = `
       SELECT 
         ((pi.cgst_rate_basis_points + pi.sgst_rate_basis_points + pi.igst_rate_basis_points) / 100.0) AS gst_class,
@@ -95,7 +98,7 @@ export class ReportsDbService {
       ORDER BY gst_class ASC
     `;
 
-    return this.db.prepare(query).all(startDate, endDate) as GstClassSummary[];
+    return this.db.prepare(query).all(start, end) as GstClassSummary[];
   }
 
   public getExpiryReport(): ExpiryReportItem[] {

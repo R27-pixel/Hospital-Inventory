@@ -59,7 +59,7 @@ export const SupplierManagerView: React.FC = () => {
           <h2>Supplier Directory</h2>
           <p>Manage registered vendors & purchase invoice suppliers</p>
         </div>
-        <button className="btn btn-primary" onClick={handleOpenAdd}>
+        <button className="btn btn-primary" onClick={handleOpenAdd} data-testid="add-supplier-btn">
           <Plus size={15} />
           <span>Add New Supplier</span>
         </button>
@@ -74,6 +74,7 @@ export const SupplierManagerView: React.FC = () => {
             placeholder="Search suppliers by name or GSTIN..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            data-testid="supplier-search-input"
           />
         </div>
       </div>
@@ -84,7 +85,7 @@ export const SupplierManagerView: React.FC = () => {
           <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>Loading suppliers...</div>
         ) : (
           <div className="table-responsive">
-            <table className="data-table">
+            <table className="data-table" data-testid="suppliers-table">
               <thead>
                 <tr>
                   <th style={{ width: '220px' }}>Supplier Name</th>
@@ -96,15 +97,15 @@ export const SupplierManagerView: React.FC = () => {
               </thead>
               <tbody>
                 {filteredSuppliers.map((sup) => (
-                  <tr key={sup.id}>
+                  <tr key={sup.id} data-testid={`supplier-row-${sup.id}`}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                         <Truck size={15} color="var(--primary)" />
-                        <strong>{sup.name}</strong>
+                        <strong data-testid={`supplier-name-${sup.id}`}>{sup.name}</strong>
                       </div>
                     </td>
                     <td>
-                      {sup.gstin ? <code>{sup.gstin}</code> : <span style={{ color: 'var(--text-muted)' }}>N/A</span>}
+                      {sup.gstin ? <code data-testid={`supplier-gstin-${sup.id}`}>{sup.gstin}</code> : <span style={{ color: 'var(--text-muted)' }}>N/A</span>}
                     </td>
                     <td>{sup.phone || 'N/A'}</td>
                     <td>{sup.address || 'N/A'}</td>
@@ -113,6 +114,7 @@ export const SupplierManagerView: React.FC = () => {
                         className="btn-icon"
                         onClick={() => handleOpenEdit(sup)}
                         title="Edit Supplier"
+                        data-testid={`edit-supplier-btn-${sup.id}`}
                       >
                         <Edit size={14} />
                       </button>

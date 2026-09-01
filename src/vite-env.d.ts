@@ -113,6 +113,9 @@ export interface PurchaseInvoice {
   total_gst: number;
   grand_total: number;
   has_arithmetic_override?: number;
+  is_cancelled?: number;
+  cancelled_at?: string;
+  cancellation_reason?: string;
   remarks?: string;
   item_count?: number;
   created_at: string;
@@ -222,6 +225,8 @@ declare global {
       reports: {
         getGstSummary: (startDate: string, endDate: string) => Promise<GstClassSummary[]>;
         getExpiryReport: () => Promise<ExpiryReportItem[]>;
+        exportPdf: (params?: { defaultPath?: string; targetPath?: string }) => Promise<{ success: boolean; path?: string; canceled?: boolean; error?: string }>;
+        print: () => Promise<{ success: boolean; error?: string }>;
       };
       backup: {
         trigger: () => Promise<{ success: boolean; path?: string; error?: string }>;

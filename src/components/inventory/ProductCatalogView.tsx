@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Product, Batch } from '../../vite-env';
 import { BatchListModal } from './BatchListModal';
 import { ProductFormModal } from './ProductFormModal';
-import { Plus, Search, Filter, Layers, Edit, Package, AlertTriangle, Clock, CheckCircle } from 'lucide-react';
+import { Plus, Search, Filter, Layers, Edit, Package, AlertTriangle, Clock, CheckCircle, Printer, FileText, CheckCircle2 } from 'lucide-react';
 
 export const ProductCatalogView: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [allBatches, setAllBatches] = useState<Batch[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exportMsg, setExportMsg] = useState<string | null>(null);
+  const [exportErr, setExportErr] = useState<string | null>(null);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -18,6 +20,40 @@ export const ProductCatalogView: React.FC = () => {
   const [selectedProductForBatches, setSelectedProductForBatches] = useState<Product | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
+  const handlePrint = () => {
+    if (window.electronAPI && window.electronAPI.reports && window.electronAPI.reports.print) {
+      window.electronAPI.reports.print();
+    } else {
+      window.print();
+    }
+  };
+
+  const handleExportPdf = async (targetPath?: string) => {
+    setExportMsg(null);
+    setExportErr(null);
+    try {
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const sanitizedQuery = searchQuery ? searchQuery.replace(/[^a-zA-Z0-9_-]/g, '_') : 'All';
+      const defaultName = `Product-Inventory-${sanitizedQuery}-${todayStr}.pdf`;
+
+      if (window.electronAPI && window.electronAPI.reports && window.electronAPI.reports.exportPdf) {
+        const res = await window.electronAPI.reports.exportPdf({
+          defaultPath: defaultName,
+          targetPath: typeof targetPath === 'string' ? targetPath : undefined,
+        });
+        if (res.success && res.path) {
+          setExportMsg(`PDF Report generated successfully: ${res.path}`);
+        } else if (res.error) {
+          setExportErr(res.error);
+        }
+      } else {
+        window.print();
+      }
+    } catch (err: any) {
+      setExportErr(err.message || 'Failed to export PDF');
+    }
+  };
 
   const loadData = async () => {
     setLoading(true);
@@ -143,10 +179,46 @@ export const ProductCatalogView: React.FC = () => {
           <h2>Product Inventory</h2>
           <p>Master catalog definitions, batch tracking & stock alert statuses</p>
         </div>
-        <button className="btn btn-primary" onClick={handleOpenAdd}>
-          <Plus size={15} />
-          <span>Add New Product</span>
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button className="btn btn-secondary" onClick={handlePrint} data-testid="print-inventory-btn">
+            <Printer size={15} />
+            <span>Print Report</span>
+          </button>
+          <button className="btn btn-secondary" onClick={() => handleExportPdf()} data-testid="export-inventory-pdf-btn">
+            <FileText size={15} />
+            <span>Export PDF</span>
+          </button>
+          <button className="btn btn-primary" onClick={handleOpenAdd} data-testid="add-product-btn">
+            <Plus size={15} />
+            <span>Add New Product</span>
+          </button>
+        </div>
+      </div>
+
+      {exportErr && (
+        <div className="alert-banner error" data-testid="export-error-alert">
+          <AlertTriangle size={16} />
+          <span>{exportErr}</span>
+        </div>
+      )}
+
+      {exportMsg && (
+        <div className="alert-banner" style={{ background: 'var(--success-bg)', border: '1px solid var(--success-border)', color: 'var(--success)' }} data-testid="export-success-alert">
+          <CheckCircle2 size={16} />
+          <span>{exportMsg}</span>
+        </div>
+      )}
+
+      {/* Printable Report Header Metadata */}
+      <div className="print-report-header" data-testid="print-report-header">
+        <h2>Product Inventory Catalog Report</h2>
+        <div className="print-meta">
+          <span><strong>Generated:</strong> {new Date().toLocaleString()}</span>
+          <span><strong>Search:</strong> {searchQuery || 'None'}</span>
+          <span><strong>Stock Filter:</strong> {stockFilter}</span>
+          <span><strong>Expiry Filter:</strong> {expiryFilter}</span>
+          <span><strong>Total Records:</strong> {filteredProducts.length}</span>
+        </div>
       </div>
 
       {/* Search & Filter Bar */}
@@ -158,6 +230,7 @@ export const ProductCatalogView: React.FC = () => {
             placeholder="Search by product name, HSN, or manufacturer..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            data-testid="product-search-input"
           />
         </div>
 
@@ -167,6 +240,7 @@ export const ProductCatalogView: React.FC = () => {
             className="form-select"
             value={stockFilter}
             onChange={(e) => setStockFilter(e.target.value as any)}
+            data-testid="product-stock-filter"
           >
             <option value="ALL">All Stock Levels</option>
             <option value="IN_STOCK">In Stock</option>
@@ -181,6 +255,7 @@ export const ProductCatalogView: React.FC = () => {
             className="form-select"
             value={expiryFilter}
             onChange={(e) => setExpiryFilter(e.target.value as any)}
+            data-testid="product-expiry-filter"
           >
             <option value="ALL">All Expiry Statuses</option>
             <option value="NORMAL">Normal Expiry</option>
@@ -196,7 +271,7 @@ export const ProductCatalogView: React.FC = () => {
           <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>Loading product inventory...</div>
         ) : (
           <div className="table-responsive">
-            <table className="data-table">
+            <table className="data-table" data-testid="products-table">
               <thead>
                 <tr>
                   <th style={{ minWidth: '180px' }}>Product Name</th>
@@ -217,8 +292,8 @@ export const ProductCatalogView: React.FC = () => {
                   const minAlert = p.min_stock_alert ?? 10;
 
                   return (
-                    <tr key={p.id}>
-                      <td><strong>{p.name}</strong></td>
+                    <tr key={p.id} data-testid={`product-row-${p.id}`}>
+                      <td><strong data-testid={`product-name-${p.id}`}>{p.name}</strong></td>
                       <td>{p.pack_size}</td>
                       <td><code>{p.hsn_code}</code></td>
                       <td>{p.manufacturer || 'N/A'}</td>
@@ -226,13 +301,14 @@ export const ProductCatalogView: React.FC = () => {
                         <button
                           className="btn btn-secondary btn-sm"
                           onClick={() => setSelectedProductForBatches(p)}
+                          data-testid={`view-batches-btn-${p.id}`}
                         >
                           <Layers size={13} />
                           <span>{p.batch_count || 0} Batches</span>
                         </button>
                       </td>
                       <td>
-                        <strong>{totalStock} units</strong>
+                        <strong data-testid={`product-stock-${p.id}`}>{totalStock} units</strong>
                       </td>
                       <td>
                         {expStatus === 'EXPIRED' && (
@@ -268,6 +344,7 @@ export const ProductCatalogView: React.FC = () => {
                           className="btn-icon"
                           onClick={() => handleOpenEdit(p)}
                           title="Edit Product"
+                          data-testid={`edit-product-btn-${p.id}`}
                         >
                           <Edit size={14} />
                         </button>

@@ -43,13 +43,13 @@ export const LoginView: React.FC = () => {
         </div>
 
         {error && (
-          <div className="alert-banner error">
+          <div className="alert-banner error" data-testid="login-error-alert">
             <AlertCircle size={16} />
             <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }} data-testid="login-form">
           <div className="form-group">
             <label className="form-label">
               <User size={14} />
@@ -61,6 +61,7 @@ export const LoginView: React.FC = () => {
               placeholder="e.g. admin or staff1"
               value={loginId}
               onChange={(e) => setLoginId(e.target.value)}
+              data-testid="login-id-input"
               required
               autoFocus
             />
@@ -77,11 +78,12 @@ export const LoginView: React.FC = () => {
               placeholder="Enter account password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              data-testid="login-password-input"
               required
             />
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', height: '38px', marginTop: '0.5rem' }} disabled={submitting}>
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', height: '38px', marginTop: '0.5rem' }} disabled={submitting} data-testid="login-submit-btn">
             <LogIn size={16} />
             <span>{submitting ? 'Authenticating...' : 'Sign In to Portal'}</span>
           </button>

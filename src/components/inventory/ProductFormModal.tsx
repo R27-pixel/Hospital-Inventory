@@ -142,9 +142,9 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             <button className="modal-close-btn" onClick={onClose}><X size={18} /></button>
           </div>
 
-          <form onSubmit={handleSubmit} className="modal-body">
+          <form onSubmit={handleSubmit} className="modal-body" data-testid="product-form">
             {error && (
-              <div className="auth-alert error" style={{ marginBottom: '1rem' }}>
+              <div className="auth-alert error" style={{ marginBottom: '1rem' }} data-testid="product-error-alert">
                 <AlertCircle size={16} />
                 <span>{error}</span>
               </div>
@@ -162,6 +162,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   placeholder="e.g. TRAN 5ML / AUGMENTIN 625MG"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  data-testid="product-name-input"
                   required
                 />
               </div>
@@ -175,6 +176,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                     placeholder="e.g. 3004"
                     value={hsnCode}
                     onChange={(e) => setHsnCode(e.target.value)}
+                    data-testid="product-hsn-input"
                     required
                   />
                 </div>
@@ -187,6 +189,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                     placeholder="e.g. 5ml Ampoule"
                     value={packSize}
                     onChange={(e) => setPackSize(e.target.value)}
+                    data-testid="product-pack-size-input"
                     required
                   />
                 </div>
@@ -201,6 +204,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                     placeholder="e.g. STRAN / Cipla"
                     value={manufacturer}
                     onChange={(e) => setManufacturer(e.target.value)}
+                    data-testid="product-mfr-input"
                     required
                   />
                 </div>
@@ -214,6 +218,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                     min={0}
                     value={minStockAlert}
                     onChange={(e) => setMinStockAlert(e.target.value ? Number(e.target.value) : '')}
+                    data-testid="product-min-stock-input"
                   />
                 </div>
               </div>
@@ -234,6 +239,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                     checked={includeInitialBatch}
                     onChange={(e) => setIncludeInitialBatch(e.target.checked)}
                     style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+                    data-testid="include-initial-batch-checkbox"
                   />
                 </div>
 
@@ -247,6 +253,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                         placeholder="e.g. STRAN-2026"
                         value={batchNumber}
                         onChange={(e) => setBatchNumber(e.target.value)}
+                        data-testid="batch-number-input"
                         required={includeInitialBatch}
                       />
                     </div>
@@ -258,6 +265,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                         className="form-input"
                         value={expiryDate}
                         onChange={(e) => setExpiryDate(e.target.value)}
+                        data-testid="batch-expiry-input"
                         required={includeInitialBatch}
                       />
                     </div>
@@ -272,6 +280,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                         value={mrp}
                         onFocus={(e) => e.target.select()}
                         onChange={(e) => setMrp(e.target.value ? Number(e.target.value) : '')}
+                        data-testid="batch-mrp-input"
                         required={includeInitialBatch}
                       />
                     </div>
@@ -286,6 +295,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                         value={purchaseRate}
                         onFocus={(e) => e.target.select()}
                         onChange={(e) => setPurchaseRate(e.target.value ? Number(e.target.value) : '')}
+                        data-testid="batch-rate-input"
                         required={includeInitialBatch}
                       />
                     </div>
@@ -300,6 +310,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                         value={discountPercent}
                         onFocus={(e) => e.target.select()}
                         onChange={(e) => setDiscountPercent(e.target.value ? Number(e.target.value) : '')}
+                        data-testid="batch-discount-input"
                       />
                     </div>
 
@@ -309,6 +320,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                         className="form-input"
                         value={gstPercent}
                         onChange={(e) => setGstPercent(Number(e.target.value))}
+                        data-testid="batch-gst-select"
                       >
                         <option value={5}>5.00%</option>
                         <option value={12}>12.00%</option>
@@ -326,6 +338,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                         min={1}
                         value={initialQty}
                         onChange={(e) => setInitialQty(e.target.value ? Number(e.target.value) : '')}
+                        data-testid="batch-qty-input"
                         required={includeInitialBatch}
                       />
                     </div>
@@ -335,10 +348,10 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             )}
 
             <div className="modal-actions" style={{ marginTop: '1.25rem' }}>
-              <button type="button" className="btn-secondary" onClick={onClose}>
+              <button type="button" className="btn-secondary" onClick={onClose} data-testid="product-cancel-btn">
                 Cancel
               </button>
-              <button type="submit" className="btn-primary">
+              <button type="submit" className="btn-primary" data-testid="product-save-btn">
                 {editingProduct ? 'Save Product Changes' : 'Create Product Catalog Item'}
               </button>
             </div>

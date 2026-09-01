@@ -653,3 +653,112 @@ textarea.form-input {
   font-weight: 700;
   color: var(--text-main);
 }
+
+/* ==========================================================================
+   PRINT STYLES & REPORT OUTPUT FORMATTING
+   ========================================================================== */
+
+.print-report-header {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  /* Hide non-printable UI navigation, topbars, buttons & alerts */
+  .app-sidebar,
+  .app-topbar,
+  .view-header-title p,
+  .filter-bar,
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-icon,
+  .sidebar-footer,
+  .alert-banner,
+  .user-badge-pill,
+  .modal-backdrop,
+  [data-testid="add-product-btn"],
+  [data-testid="print-inventory-btn"],
+  [data-testid="export-inventory-pdf-btn"],
+  [data-testid="print-gst-btn"],
+  [data-testid="export-gst-pdf-btn"] {
+    display: none !important;
+  }
+
+  body, html, #root, .app-shell, .app-main, .app-viewport, .view-container, .card-surface {
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .table-responsive {
+    overflow: visible !important;
+    border: none !important;
+  }
+
+  .print-report-header {
+    display: block !important;
+    margin-bottom: 12px !important;
+    border-bottom: 2px solid #0f172a !important;
+    padding-bottom: 8px !important;
+  }
+
+  .print-report-header h2 {
+    font-size: 16pt !important;
+    font-weight: bold !important;
+    color: #0f172a !important;
+    margin-bottom: 4px !important;
+  }
+
+  .print-report-header .print-meta {
+    font-size: 9pt !important;
+    color: #334155 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  table.data-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 9pt !important;
+    page-break-inside: auto !important;
+  }
+
+  table.data-table tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  table.data-table th, table.data-table td {
+    border: 1px solid #cbd5e1 !important;
+    padding: 5px 6px !important;
+    color: #000000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  table.data-table th {
+    background-color: #f1f5f9 !important;
+    font-weight: bold !important;
+  }
+
+  .badge {
+    border: 1px solid #94a3b8 !important;
+    color: #000000 !important;
+    background: transparent !important;
+    padding: 1px 4px !important;
+    font-size: 8pt !important;
+  }
+}

@@ -185,14 +185,14 @@ export const StockExitView: React.FC = () => {
               </div>
 
               {error && (
-                <div className="alert-banner error">
+                <div className="alert-banner error" data-testid="stock-exit-error-alert">
                   <AlertCircle size={16} />
                   <span>{error}</span>
                 </div>
               )}
 
               {successMsg && (
-                <div className="alert-banner" style={{ background: 'var(--success-bg)', border: '1px solid var(--success-border)', color: 'var(--success)' }}>
+                <div className="alert-banner" style={{ background: 'var(--success-bg)', border: '1px solid var(--success-border)', color: 'var(--success)' }} data-testid="stock-exit-success-alert">
                   <CheckCircle2 size={16} />
                   <span>{successMsg}</span>
                 </div>
@@ -205,6 +205,7 @@ export const StockExitView: React.FC = () => {
                     className="form-select"
                     value={selectedProductId}
                     onChange={(e) => setSelectedProductId(Number(e.target.value))}
+                    data-testid="stock-exit-product-select"
                     required
                   >
                     {products.map((p) => (
@@ -221,6 +222,7 @@ export const StockExitView: React.FC = () => {
                     className="form-select"
                     value={selectedBatchId}
                     onChange={(e) => setSelectedBatchId(Number(e.target.value))}
+                    data-testid="stock-exit-batch-select"
                     required
                     disabled={availableBatches.length === 0}
                   >
@@ -255,6 +257,7 @@ export const StockExitView: React.FC = () => {
                     max={currentStock || 1}
                     value={exitQuantity}
                     onChange={(e) => setExitQuantity(e.target.value ? Number(e.target.value) : '')}
+                    data-testid="stock-exit-qty-input"
                     required
                     disabled={!selectedBatch || currentStock <= 0}
                   />
@@ -267,6 +270,7 @@ export const StockExitView: React.FC = () => {
                   className="form-select"
                   value={reasonCategory}
                   onChange={(e) => setReasonCategory(e.target.value as any)}
+                  data-testid="stock-exit-reason-select"
                 >
                   <option value="Issued">Issued (Hospital Ward / OT Department)</option>
                   <option value="Sold">Sold (Direct Patient Sale)</option>
@@ -284,6 +288,7 @@ export const StockExitView: React.FC = () => {
                     placeholder="e.g. Expired batch disposal / Transfer"
                     value={customReason}
                     onChange={(e) => setCustomReason(e.target.value)}
+                    data-testid="stock-exit-custom-reason-input"
                     required
                   />
                 </div>
@@ -333,6 +338,7 @@ export const StockExitView: React.FC = () => {
                   type="submit"
                   className="btn btn-danger"
                   disabled={!selectedBatch || currentStock <= 0 || submitting}
+                  data-testid="stock-exit-submit-btn"
                 >
                   <LogOut size={15} />
                   <span>{submitting ? 'Executing...' : 'Authorize & Exit'}</span>

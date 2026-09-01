@@ -446,6 +446,7 @@ export const PurchaseEntryView: React.FC = () => {
                       className="btn btn-secondary btn-sm"
                       style={{ padding: '0.1rem 0.35rem', fontSize: '0.74rem' }}
                       onClick={() => setIsSupplierModalOpen(true)}
+                      data-testid="purchase-new-supplier-btn"
                     >
                       <Plus size={11} />
                       <span>New Supplier</span>
@@ -455,11 +456,12 @@ export const PurchaseEntryView: React.FC = () => {
                     className="form-select"
                     value={supplierId}
                     onChange={(e) => setSupplierId(Number(e.target.value))}
+                    data-testid="purchase-supplier-select"
                     required
                   >
                     {suppliers.map((s) => (
                       <option key={s.id} value={s.id}>
-                        {s.name} {s.gstin ? `(${s.gstin})` : ''}
+                        {s.name}{s.gstin ? ` (${s.gstin})` : ''}
                       </option>
                     ))}
                   </select>
@@ -471,6 +473,7 @@ export const PurchaseEntryView: React.FC = () => {
                     className="form-select"
                     value={documentType}
                     onChange={(e) => setDocumentType(e.target.value as any)}
+                    data-testid="purchase-doc-type-select"
                     required
                   >
                     <option value="TAX_INVOICE">Tax Invoice</option>
@@ -486,6 +489,7 @@ export const PurchaseEntryView: React.FC = () => {
                     placeholder="e.g. L-00275"
                     value={invoiceNumber}
                     onChange={(e) => setInvoiceNumber(e.target.value)}
+                    data-testid="purchase-invoice-number-input"
                     required
                   />
                 </div>
@@ -497,6 +501,7 @@ export const PurchaseEntryView: React.FC = () => {
                     className="form-input"
                     value={invoiceDate}
                     onChange={(e) => setInvoiceDate(e.target.value)}
+                    data-testid="purchase-invoice-date-input"
                     required
                   />
                 </div>
@@ -580,11 +585,11 @@ export const PurchaseEntryView: React.FC = () => {
                 <span>Invoice Line Items ({items.length})</span>
               </h3>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setIsProductModalOpen(true)}>
+                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setIsProductModalOpen(true)} data-testid="purchase-create-product-btn">
                   <Plus size={13} />
                   <span>Create New Product</span>
                 </button>
-                <button type="button" className="btn btn-primary btn-sm" onClick={handleAddItem}>
+                <button type="button" className="btn btn-primary btn-sm" onClick={handleAddItem} data-testid="purchase-add-row-btn">
                   <Plus size={13} />
                   <span>Add Line Row</span>
                 </button>
@@ -592,7 +597,7 @@ export const PurchaseEntryView: React.FC = () => {
             </div>
 
             <div className="table-responsive">
-              <table className="data-table" style={{ minWidth: '1900px' }}>
+              <table className="data-table" style={{ minWidth: '1900px' }} data-testid="purchase-items-table">
                 <thead>
                   <tr>
                     <th style={{ width: '45px' }}>S.N.</th>
@@ -632,7 +637,7 @@ export const PurchaseEntryView: React.FC = () => {
                     const calcNetRate = stockAdded > 0 ? (netAmt / stockAdded).toFixed(2) : '0.00';
 
                     return (
-                      <tr key={idx}>
+                      <tr key={idx} data-testid={`purchase-item-row-${idx}`}>
                         <td>{idx + 1}</td>
                         <td>
                           <input
@@ -641,6 +646,7 @@ export const PurchaseEntryView: React.FC = () => {
                             style={{ height: '28px', padding: '0 0.4rem', fontSize: '0.8rem' }}
                             value={item.hsn_code}
                             onChange={(e) => handleItemChange(idx, 'hsn_code', e.target.value)}
+                            data-testid={`purchase-item-hsn-${idx}`}
                             required
                           />
                         </td>
@@ -653,6 +659,7 @@ export const PurchaseEntryView: React.FC = () => {
                             value={item.product_name}
                             onChange={(e) => handleSelectProductSuggestion(idx, e.target.value)}
                             list={`prod-list-${idx}`}
+                            data-testid={`purchase-item-name-${idx}`}
                             required
                           />
                           <datalist id={`prod-list-${idx}`}>
@@ -668,6 +675,7 @@ export const PurchaseEntryView: React.FC = () => {
                             style={{ height: '28px', padding: '0 0.4rem', fontSize: '0.8rem' }}
                             value={item.pack_size}
                             onChange={(e) => handleItemChange(idx, 'pack_size', e.target.value)}
+                            data-testid={`purchase-item-pack-${idx}`}
                             required
                           />
                         </td>
@@ -679,6 +687,7 @@ export const PurchaseEntryView: React.FC = () => {
                             min={1}
                             value={item.quantity}
                             onChange={(e) => handleItemChange(idx, 'quantity', Number(e.target.value))}
+                            data-testid={`purchase-item-qty-${idx}`}
                             required
                           />
                         </td>
@@ -690,6 +699,7 @@ export const PurchaseEntryView: React.FC = () => {
                             min={0}
                             value={item.free_quantity}
                             onChange={(e) => handleItemChange(idx, 'free_quantity', Number(e.target.value))}
+                            data-testid={`purchase-item-free-qty-${idx}`}
                           />
                         </td>
                         <td>
@@ -699,6 +709,7 @@ export const PurchaseEntryView: React.FC = () => {
                             style={{ height: '28px', padding: '0 0.4rem', fontSize: '0.8rem' }}
                             value={item.batch_number}
                             onChange={(e) => handleItemChange(idx, 'batch_number', e.target.value)}
+                            data-testid={`purchase-item-batch-${idx}`}
                             required
                           />
                         </td>
@@ -709,6 +720,7 @@ export const PurchaseEntryView: React.FC = () => {
                             style={{ height: '28px', padding: '0 0.4rem', fontSize: '0.8rem' }}
                             value={item.manufacturer || ''}
                             onChange={(e) => handleItemChange(idx, 'manufacturer', e.target.value)}
+                            data-testid={`purchase-item-mfr-${idx}`}
                           />
                         </td>
                         <td>
@@ -719,6 +731,7 @@ export const PurchaseEntryView: React.FC = () => {
                             placeholder="e.g. 04/2027"
                             value={item.expiry_date}
                             onChange={(e) => handleItemChange(idx, 'expiry_date', e.target.value)}
+                            data-testid={`purchase-item-exp-${idx}`}
                             required
                           />
                         </td>
@@ -731,6 +744,7 @@ export const PurchaseEntryView: React.FC = () => {
                             value={item.mrp}
                             onFocus={(e) => e.target.select()}
                             onChange={(e) => handleItemChange(idx, 'mrp', Number(e.target.value))}
+                            data-testid={`purchase-item-mrp-${idx}`}
                             required
                           />
                         </td>
@@ -743,6 +757,7 @@ export const PurchaseEntryView: React.FC = () => {
                             value={item.purchase_rate}
                             onFocus={(e) => e.target.select()}
                             onChange={(e) => handleItemChange(idx, 'purchase_rate', Number(e.target.value))}
+                            data-testid={`purchase-item-rate-${idx}`}
                             required
                           />
                         </td>
@@ -755,6 +770,7 @@ export const PurchaseEntryView: React.FC = () => {
                             value={item.discount_percent}
                             onFocus={(e) => e.target.select()}
                             onChange={(e) => handleItemChange(idx, 'discount_percent', Number(e.target.value))}
+                            data-testid={`purchase-item-disc-${idx}`}
                           />
                         </td>
                         <td>
@@ -766,6 +782,7 @@ export const PurchaseEntryView: React.FC = () => {
                             value={item.sgst_percent}
                             onFocus={(e) => e.target.select()}
                             onChange={(e) => handleItemChange(idx, 'sgst_percent', Number(e.target.value))}
+                            data-testid={`purchase-item-sgst-${idx}`}
                           />
                         </td>
                         <td>
@@ -777,6 +794,7 @@ export const PurchaseEntryView: React.FC = () => {
                             value={item.cgst_percent}
                             onFocus={(e) => e.target.select()}
                             onChange={(e) => handleItemChange(idx, 'cgst_percent', Number(e.target.value))}
+                            data-testid={`purchase-item-cgst-${idx}`}
                           />
                         </td>
                         <td>
@@ -788,6 +806,7 @@ export const PurchaseEntryView: React.FC = () => {
                             value={item.igst_percent}
                             onFocus={(e) => e.target.select()}
                             onChange={(e) => handleItemChange(idx, 'igst_percent', Number(e.target.value))}
+                            data-testid={`purchase-item-igst-${idx}`}
                           />
                         </td>
                         <td>
@@ -820,6 +839,7 @@ export const PurchaseEntryView: React.FC = () => {
                             className="btn-icon"
                             onClick={() => handleRemoveItem(idx)}
                             title="Clear / Remove Row"
+                            data-testid={`purchase-item-remove-${idx}`}
                           >
                             <Trash2 size={13} color="var(--danger)" />
                           </button>
@@ -853,6 +873,7 @@ export const PurchaseEntryView: React.FC = () => {
                     placeholder={`Calc: ₹${totals.calcTaxable.toFixed(2)}`}
                     value={supplierTaxableTotal}
                     onChange={(e) => setSupplierTaxableTotal(e.target.value ? Number(e.target.value) : '')}
+                    data-testid="supplier-printed-taxable-input"
                   />
                 </div>
 
@@ -866,6 +887,7 @@ export const PurchaseEntryView: React.FC = () => {
                     placeholder={`Calc: ₹${totals.calcGrandTotal.toFixed(2)}`}
                     value={supplierGrandTotal}
                     onChange={(e) => setSupplierGrandTotal(e.target.value ? Number(e.target.value) : '')}
+                    data-testid="supplier-printed-grand-total-input"
                   />
                 </div>
 
@@ -877,6 +899,7 @@ export const PurchaseEntryView: React.FC = () => {
                     className="form-input"
                     value={supplierOtherCharges}
                     onChange={(e) => setSupplierOtherCharges(e.target.value ? Number(e.target.value) : '')}
+                    data-testid="supplier-other-charges-input"
                   />
                 </div>
 
@@ -888,6 +911,7 @@ export const PurchaseEntryView: React.FC = () => {
                     className="form-input"
                     value={supplierRoundOff}
                     onChange={(e) => setSupplierRoundOff(e.target.value ? Number(e.target.value) : '')}
+                    data-testid="supplier-round-off-input"
                   />
                 </div>
               </div>
@@ -925,7 +949,7 @@ export const PurchaseEntryView: React.FC = () => {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border-color)', paddingTop: '0.4rem' }}>
                   <span style={{ fontWeight: 700 }}>System Calculated Grand Total:</span>
-                  <strong style={{ fontSize: '1rem', color: 'var(--primary)' }}>₹{totals.calcGrandTotal.toFixed(2)}</strong>
+                  <strong style={{ fontSize: '1rem', color: 'var(--primary)' }} data-testid="calc-grand-total">₹{totals.calcGrandTotal.toFixed(2)}</strong>
                 </div>
               </div>
             </div>
@@ -985,7 +1009,7 @@ export const PurchaseEntryView: React.FC = () => {
               Cancel Entry
             </button>
 
-            <button type="submit" className={`btn ${hasDiscrepancy ? 'btn-danger' : 'btn-primary'}`}>
+            <button type="submit" className={`btn ${hasDiscrepancy ? 'btn-danger' : 'btn-primary'}`} data-testid="purchase-save-btn">
               {hasDiscrepancy ? <ShieldAlert size={16} /> : <CheckCircle2 size={16} />}
               <span>
                 {hasDiscrepancy
@@ -1018,6 +1042,7 @@ export const PurchaseEntryView: React.FC = () => {
                   <th>Date</th>
                   <th>Grand Total</th>
                   <th>Discrepancy Status</th>
+                  <th>Status / Action</th>
                   <th>Saved At</th>
                 </tr>
               </thead>
@@ -1029,10 +1054,38 @@ export const PurchaseEntryView: React.FC = () => {
                     <td>{inv.invoice_date}</td>
                     <td><strong>₹{inv.grand_total.toFixed(2)}</strong></td>
                     <td>
-                      {inv.has_arithmetic_override ? (
-                        <span className="badge badge-warning">Master Override</span>
+                      {inv.is_cancelled === 1 ? (
+                        <span className="badge badge-danger" data-testid={`inv-status-badge-${inv.id}`}>CANCELLED</span>
+                      ) : inv.has_arithmetic_override ? (
+                        <span className="badge badge-warning" data-testid={`inv-status-badge-${inv.id}`}>Master Override</span>
                       ) : (
-                        <span className="badge badge-success">Reconciled</span>
+                        <span className="badge badge-success" data-testid={`inv-status-badge-${inv.id}`}>Reconciled</span>
+                      )}
+                    </td>
+                    <td>
+                      {inv.is_cancelled === 1 ? (
+                        <span className="badge badge-danger" data-testid={`inv-cancelled-badge-${inv.id}`}>CANCELLED</span>
+                      ) : !isStaff ? (
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-danger"
+                          style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}
+                          data-testid={`cancel-invoice-btn-${inv.id}`}
+                          onClick={async () => {
+                            if (window.electronAPI && window.electronAPI.purchases) {
+                              const res = await window.electronAPI.purchases.delete({ id: inv.id, reason: 'Cancelled by Master Admin via UI' });
+                              if (res.success) {
+                                await loadInitialData();
+                              } else {
+                                setError(res.error || 'Failed to cancel purchase invoice.');
+                              }
+                            }
+                          }}
+                        >
+                          Cancel Invoice
+                        </button>
+                      ) : (
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Active</span>
                       )}
                     </td>
                     <td>{inv.created_at}</td>
@@ -1041,7 +1094,7 @@ export const PurchaseEntryView: React.FC = () => {
 
                 {invoices.length === 0 && (
                   <tr>
-                    <td colSpan={6} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+                    <td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
                       No purchase invoices recorded yet.
                     </td>
                   </tr>

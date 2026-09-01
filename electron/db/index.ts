@@ -188,7 +188,7 @@ export class InventoryDbService {
         SET name = ?, gstin = ?, pan_no = ?, drug_license_no = ?, phone = ?, email = ?, address = ?, state_name = ?, state_code = ?, updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
       `);
-      stmt.run(
+      const res = stmt.run(
         data.name.trim(),
         data.gstin ? data.gstin.trim() : null,
         data.pan_no ? data.pan_no.trim() : null,
@@ -200,6 +200,9 @@ export class InventoryDbService {
         data.state_code ? data.state_code.trim() : '10',
         data.id
       );
+      if (res.changes === 0) {
+        return { success: false, error: `Supplier record ID ${data.id} not found.` };
+      }
       if (userId) {
         this.db.prepare(`
           INSERT INTO audit_logs (user_id, action, entity_type, entity_id, details)
@@ -634,7 +637,11 @@ export class InventoryDbService {
         pi.supplier_id,
         s.name AS supplier_name,
         pi.invoice_date,
+        pi.supplier_taxable_total_paise,
+        pi.supplier_total_gst_paise,
         pi.supplier_grand_total_paise,
+        pi.calculated_taxable_total_paise,
+        pi.calculated_gst_total_paise,
         pi.calculated_grand_total_paise,
         pi.has_arithmetic_override,
         pi.is_cancelled,
@@ -647,12 +654,24 @@ export class InventoryDbService {
       ORDER BY pi.invoice_date DESC, pi.id DESC
     `;
     const rows = this.db.prepare(query).all() as any[];
-    return rows.map((r) => ({
-      ...r,
-      total_taxable_amount: paiseToRupees(r.supplier_grand_total_paise || r.calculated_grand_total_paise),
-      total_gst: 0,
-      grand_total: paiseToRupees(r.supplier_grand_total_paise || r.calculated_grand_total_paise),
-    }));
+    return rows.map((r) => {
+      const taxablePaise = (r.supplier_taxable_total_paise !== undefined && r.supplier_taxable_total_paise !== null && r.supplier_taxable_total_paise > 0) 
+        ? r.supplier_taxable_total_paise 
+        : (r.calculated_taxable_total_paise || 0);
+      const gstPaise = (r.supplier_total_gst_paise !== undefined && r.supplier_total_gst_paise !== null && r.supplier_total_gst_paise > 0) 
+        ? r.supplier_total_gst_paise 
+        : (r.calculated_gst_total_paise || 0);
+      const grandPaise = (r.supplier_grand_total_paise !== undefined && r.supplier_grand_total_paise !== null && r.supplier_grand_total_paise > 0) 
+        ? r.supplier_grand_total_paise 
+        : (r.calculated_grand_total_paise || 0);
+
+      return {
+        ...r,
+        total_taxable_amount: paiseToRupees(taxablePaise),
+        total_gst: paiseToRupees(gstPaise),
+        grand_total: paiseToRupees(grandPaise),
+      };
+    });
   }
 
   public cancelPurchaseInvoice(id: number, cancelledByUserId: number, reason: string): { success: boolean; error?: string } {

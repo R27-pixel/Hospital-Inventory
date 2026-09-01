@@ -1,6 +1,7 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 import Database from 'better-sqlite3';
 import { AuthManager } from './auth';
 import { initializeDatabaseSchema } from './db/schema';
@@ -10,6 +11,23 @@ import { BackupEngine } from './db/backup';
 
 // Silence Chromium GPU Shader cache disk permission logs on Windows
 app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
+
+// Support custom --user-data-dir CLI flag for isolated QA environments & Playwright tests
+const userDataArgIndex = process.argv.findIndex((arg) => arg.startsWith('--user-data-dir='));
+if (userDataArgIndex !== -1) {
+  let customUserDataPath = process.argv[userDataArgIndex].substring('--user-data-dir='.length);
+  let idx = userDataArgIndex + 1;
+  while (idx < process.argv.length && !process.argv[idx].startsWith('--')) {
+    customUserDataPath += ' ' + process.argv[idx];
+    idx++;
+  }
+  if ((customUserDataPath.startsWith('"') && customUserDataPath.endsWith('"')) || (customUserDataPath.startsWith("'") && customUserDataPath.endsWith("'"))) {
+    customUserDataPath = customUserDataPath.slice(1, -1);
+  }
+  if (customUserDataPath) {
+    app.setPath('userData', customUserDataPath);
+  }
+}
 
 let mainWindow: BrowserWindow | null = null;
 let db: Database.Database | null = null;
@@ -220,14 +238,68 @@ function registerIpcHandlers(): void {
   });
 
   // --- Reports IPC Handlers ---
-  ipcMain.handle('reports:getGstSummary', (_event, params: { startDate: string; endDate: string }) => {
+  ipcMain.handle('reports:getGstSummary', (_event, params?: { startDate?: string; endDate?: string }) => {
     if (!authManager || !authManager.getActiveSession() || !reportsDbService) return [];
-    return reportsDbService.getGstSummary(params.startDate, params.endDate);
+    const sDate = params?.startDate || '1970-01-01';
+    const eDate = params?.endDate || '2099-12-31';
+    return reportsDbService.getGstSummary(sDate, eDate);
   });
 
   ipcMain.handle('reports:getExpiryReport', () => {
     if (!authManager || !authManager.getActiveSession() || !reportsDbService) return [];
     return reportsDbService.getExpiryReport();
+  });
+
+  ipcMain.handle('reports:print', () => {
+    const win = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0];
+    if (!win) return { success: false, error: 'No active window' };
+    win.webContents.print({ silent: false });
+    return { success: true };
+  });
+
+  ipcMain.handle('reports:exportPdf', async (_event, params?: { defaultPath?: string; targetPath?: string }) => {
+    if (!authManager || !authManager.getActiveSession()) {
+      return { success: false, error: 'Unauthenticated: Please log in to export reports.' };
+    }
+    const mainWin = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0];
+    if (!mainWin) return { success: false, error: 'No active window available for PDF rendering.' };
+
+    let savePath = params?.targetPath;
+    if (!savePath) {
+      const result = await dialog.showSaveDialog(mainWin, {
+        title: 'Export PDF Report',
+        defaultPath: params?.defaultPath || 'Report.pdf',
+        filters: [{ name: 'PDF Documents', extensions: ['pdf'] }],
+      });
+      if (result.canceled || !result.filePath) {
+        return { success: false, canceled: true };
+      }
+      savePath = result.filePath;
+    }
+
+    const targetFile = savePath;
+
+    // Defer printToPDF execution to next event loop tick to prevent renderer event loop deadlock
+    return new Promise((resolve) => {
+      setTimeout(async () => {
+        try {
+          const dir = path.dirname(targetFile);
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+          }
+
+          const pdfData = await mainWin.webContents.printToPDF({
+            printBackground: true,
+            pageSize: 'A4',
+          });
+
+          fs.writeFileSync(targetFile, pdfData);
+          resolve({ success: true, path: targetFile });
+        } catch (err: any) {
+          resolve({ success: false, error: err.message || 'Failed to export PDF report.' });
+        }
+      }, 50);
+    });
   });
 
   // --- Stock Exit IPC Handlers ---
@@ -347,17 +419,18 @@ app.whenReady().then(() => {
   });
 });
 
-app.on('window-all-closed', async () => {
-  if (backupTimer) clearInterval(backupTimer);
-  if (backupEngine) {
-    try {
-      await backupEngine.createBackup('ON_SHUTDOWN');
-    } catch (err) {
-      console.error('Shutdown backup error:', err);
-    }
+app.on('window-all-closed', () => {
+  if (backupTimer) {
+    clearInterval(backupTimer);
+    backupTimer = null;
   }
-  if (db) {
-    db.close();
+  if (db && db.open) {
+    try {
+      db.pragma('wal_checkpoint(TRUNCATE)');
+      db.close();
+    } catch (err) {
+      console.error('DB close error:', err);
+    }
     db = null;
   }
   if (process.platform !== 'darwin') {

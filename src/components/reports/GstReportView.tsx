@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { GstClassSummary } from '../../vite-env';
-import { PieChart, Calendar, AlertCircle, Filter } from 'lucide-react';
+import { PieChart, Calendar, AlertCircle, Filter, Printer, FileText, CheckCircle2 } from 'lucide-react';
 
 export const GstReportView: React.FC = () => {
   const [dateRangeMode, setDateRangeMode] = useState<'today' | 'week' | 'month' | 'custom'>('month');
@@ -12,6 +12,40 @@ export const GstReportView: React.FC = () => {
   // Data
   const [gstSummaries, setGstSummaries] = useState<GstClassSummary[]>([]);
   const [loading, setLoading] = useState(false);
+  const [exportMsg, setExportMsg] = useState<string | null>(null);
+  const [exportErr, setExportErr] = useState<string | null>(null);
+
+  const handlePrint = () => {
+    if (window.electronAPI && window.electronAPI.reports && window.electronAPI.reports.print) {
+      window.electronAPI.reports.print();
+    } else {
+      window.print();
+    }
+  };
+
+  const handleExportPdf = async (targetPath?: string) => {
+    setExportMsg(null);
+    setExportErr(null);
+    try {
+      const defaultName = `GST-Report-${startDate}-to-${endDate}.pdf`;
+
+      if (window.electronAPI && window.electronAPI.reports && window.electronAPI.reports.exportPdf) {
+        const res = await window.electronAPI.reports.exportPdf({
+          defaultPath: defaultName,
+          targetPath: typeof targetPath === 'string' ? targetPath : undefined,
+        });
+        if (res.success && res.path) {
+          setExportMsg(`GST PDF Report generated successfully: ${res.path}`);
+        } else if (res.error) {
+          setExportErr(res.error);
+        }
+      } else {
+        window.print();
+      }
+    } catch (err: any) {
+      setExportErr(err.message || 'Failed to export GST PDF');
+    }
+  };
 
   // Set date helpers based on preset mode
   useEffect(() => {
@@ -88,6 +122,41 @@ export const GstReportView: React.FC = () => {
           <h2>Purchase GST Report</h2>
           <p>Purchase Input Tax Credit aggregation & GST class breakdown</p>
         </div>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button className="btn btn-secondary" onClick={handlePrint} data-testid="print-gst-btn">
+            <Printer size={15} />
+            <span>Print Report</span>
+          </button>
+          <button className="btn btn-secondary" onClick={() => handleExportPdf()} data-testid="export-gst-pdf-btn">
+            <FileText size={15} />
+            <span>Export PDF</span>
+          </button>
+        </div>
+      </div>
+
+      {exportErr && (
+        <div className="alert-banner error" data-testid="export-error-alert">
+          <AlertCircle size={16} />
+          <span>{exportErr}</span>
+        </div>
+      )}
+
+      {exportMsg && (
+        <div className="alert-banner" style={{ background: 'var(--success-bg)', border: '1px solid var(--success-border)', color: 'var(--success)' }} data-testid="export-success-alert">
+          <CheckCircle2 size={16} />
+          <span>{exportMsg}</span>
+        </div>
+      )}
+
+      {/* Printable Report Header Metadata */}
+      <div className="print-report-header" data-testid="print-report-header">
+        <h2>Purchase GST Summary Report</h2>
+        <div className="print-meta">
+          <span><strong>Period:</strong> {startDate} to {endDate}</span>
+          <span><strong>Generated:</strong> {new Date().toLocaleString()}</span>
+          <span><strong>Line Items:</strong> {overallTotals.items}</span>
+          <span><strong>Grand Total:</strong> ₹{overallTotals.grandTotal.toFixed(2)}</span>
+        </div>
       </div>
 
       {/* GST Scope Disclaimer */}
@@ -143,6 +212,7 @@ export const GstReportView: React.FC = () => {
               setStartDate(e.target.value);
               setDateRangeMode('custom');
             }}
+            data-testid="gst-start-date"
           />
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>To:</span>
           <input
@@ -153,8 +223,9 @@ export const GstReportView: React.FC = () => {
               setEndDate(e.target.value);
               setDateRangeMode('custom');
             }}
+            data-testid="gst-end-date"
           />
-          <button className="btn btn-primary btn-sm" onClick={handleApplyFilter}>
+          <button className="btn btn-primary btn-sm" onClick={handleApplyFilter} data-testid="gst-apply-filter-btn">
             <Filter size={13} />
             <span>Apply Filter</span>
           </button>

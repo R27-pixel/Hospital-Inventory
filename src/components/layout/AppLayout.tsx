@@ -87,6 +87,7 @@ export const AppLayout: React.FC = () => {
           <button
             className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
             onClick={() => setActiveTab('dashboard')}
+            data-testid="nav-dashboard"
           >
             <LayoutDashboard size={17} />
             <span>Dashboard</span>
@@ -95,6 +96,7 @@ export const AppLayout: React.FC = () => {
           <button
             className={`nav-item ${activeTab === 'inventory' ? 'active' : ''}`}
             onClick={() => setActiveTab('inventory')}
+            data-testid="nav-inventory"
           >
             <Package size={17} />
             <span>Product Inventory</span>
@@ -103,6 +105,7 @@ export const AppLayout: React.FC = () => {
           <button
             className={`nav-item ${activeTab === 'purchases' ? 'active' : ''}`}
             onClick={() => setActiveTab('purchases')}
+            data-testid="nav-purchases"
           >
             <FileText size={17} />
             <span>Purchase Entry</span>
@@ -111,6 +114,7 @@ export const AppLayout: React.FC = () => {
           <button
             className={`nav-item ${activeTab === 'stock-exit' ? 'active' : ''}`}
             onClick={() => setActiveTab('stock-exit')}
+            data-testid="nav-stock-exit"
           >
             <LogOut size={17} color="#38bdf8" />
             <span>Stock Exit</span>
@@ -119,6 +123,7 @@ export const AppLayout: React.FC = () => {
           <button
             className={`nav-item ${activeTab === 'suppliers' ? 'active' : ''}`}
             onClick={() => setActiveTab('suppliers')}
+            data-testid="nav-suppliers"
           >
             <Truck size={17} />
             <span>Suppliers</span>
@@ -127,6 +132,7 @@ export const AppLayout: React.FC = () => {
           <button
             className={`nav-item ${activeTab === 'reports' ? 'active' : ''}`}
             onClick={() => setActiveTab('reports')}
+            data-testid="nav-reports"
           >
             <PieChart size={17} />
             <span>GST Reports</span>
@@ -135,6 +141,7 @@ export const AppLayout: React.FC = () => {
           <button
             className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`}
             onClick={() => setActiveTab('settings')}
+            data-testid="nav-settings"
           >
             <Settings size={17} />
             <span>Backup & Security</span>
@@ -142,7 +149,7 @@ export const AppLayout: React.FC = () => {
         </nav>
 
         <div className="sidebar-footer">
-          <button className="sidebar-logout-btn" onClick={logout}>
+          <button className="sidebar-logout-btn" onClick={logout} data-testid="nav-logout">
             <Lock size={15} />
             <span>Lock / Logout</span>
           </button>
@@ -162,13 +169,14 @@ export const AppLayout: React.FC = () => {
                 className="badge badge-warning"
                 style={{ cursor: 'pointer', padding: '0.35rem 0.65rem' }}
                 onClick={() => setActiveTab('inventory')}
+                data-testid="expiry-warning-badge"
               >
                 <Clock size={13} />
                 <span>{expiringSoonCount} Batches Expiring Soon</span>
               </div>
             )}
 
-            <div className={`user-badge-pill ${isMaster ? 'master' : 'staff'}`}>
+            <div className={`user-badge-pill ${isMaster ? 'master' : 'staff'}`} data-testid="user-role-badge">
               <ShieldCheck size={14} />
               <span>{isMaster ? 'MASTER ADMIN' : 'STAFF MODE'} ({user?.loginId || 'User'})</span>
             </div>

@@ -37,6 +37,8 @@ const electronAPI = {
   reports: {
     getGstSummary: (startDate: string, endDate: string) => ipcRenderer.invoke('reports:getGstSummary', { startDate, endDate }),
     getExpiryReport: () => ipcRenderer.invoke('reports:getExpiryReport'),
+    exportPdf: (params?: { defaultPath?: string; targetPath?: string }) => ipcRenderer.invoke('reports:exportPdf', params),
+    print: () => ipcRenderer.invoke('reports:print'),
   },
   backup: {
     trigger: () => ipcRenderer.invoke('backup:trigger'),

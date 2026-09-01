@@ -90,13 +90,13 @@ export const InitialSetupView: React.FC = () => {
         </div>
 
         {error && (
-          <div className="alert-banner error">
+          <div className="alert-banner error" data-testid="setup-error-alert">
             <AlertCircle size={16} />
             <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }} data-testid="initial-setup-form">
           {/* Section 1: Master Admin Account */}
           <div style={{ background: 'var(--bg-surface-secondary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.75rem', fontWeight: 700, fontSize: '0.9rem', color: 'var(--warning)' }}>
@@ -113,6 +113,7 @@ export const InitialSetupView: React.FC = () => {
                   placeholder="e.g. admin_master"
                   value={masterLoginId}
                   onChange={(e) => setMasterLoginId(e.target.value)}
+                  data-testid="master-login-id"
                   required
                 />
               </div>
@@ -125,6 +126,7 @@ export const InitialSetupView: React.FC = () => {
                   placeholder="Min 8 characters"
                   value={masterPassword}
                   onChange={(e) => setMasterPassword(e.target.value)}
+                  data-testid="master-password"
                   required
                 />
               </div>
@@ -138,6 +140,7 @@ export const InitialSetupView: React.FC = () => {
                 placeholder="Re-enter Master password"
                 value={masterConfirmPassword}
                 onChange={(e) => setMasterConfirmPassword(e.target.value)}
+                data-testid="master-confirm-password"
                 required
               />
             </div>
@@ -159,6 +162,7 @@ export const InitialSetupView: React.FC = () => {
                   placeholder="e.g. staff_op"
                   value={staffLoginId}
                   onChange={(e) => setStaffLoginId(e.target.value)}
+                  data-testid="staff-login-id"
                   required
                 />
               </div>
@@ -171,6 +175,7 @@ export const InitialSetupView: React.FC = () => {
                   placeholder="Min 8 characters"
                   value={staffPassword}
                   onChange={(e) => setStaffPassword(e.target.value)}
+                  data-testid="staff-password"
                   required
                 />
               </div>
@@ -184,12 +189,13 @@ export const InitialSetupView: React.FC = () => {
                 placeholder="Re-enter Staff password"
                 value={staffConfirmPassword}
                 onChange={(e) => setStaffConfirmPassword(e.target.value)}
+                data-testid="staff-confirm-password"
                 required
               />
             </div>
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ height: '40px', marginTop: '0.5rem' }} disabled={submitting}>
+          <button type="submit" className="btn btn-primary" style={{ height: '40px', marginTop: '0.5rem' }} disabled={submitting} data-testid="submit-initial-setup">
             <KeyRound size={16} />
             <span>{submitting ? 'Creating Accounts...' : 'Initialize Accounts & Proceed'}</span>
           </button>

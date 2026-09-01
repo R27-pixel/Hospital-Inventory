@@ -127,9 +127,9 @@ export const SupplierFormModal: React.FC<SupplierFormModalProps> = ({
           <button className="modal-close-btn" onClick={onClose}><X size={18} /></button>
         </div>
 
-        <form onSubmit={handleSubmit} className="modal-body">
+        <form onSubmit={handleSubmit} className="modal-body" data-testid="supplier-form">
           {error && (
-            <div className="alert-banner error" style={{ marginBottom: '1rem' }}>
+            <div className="alert-banner error" style={{ marginBottom: '1rem' }} data-testid="supplier-error-alert">
               <AlertCircle size={16} />
               <span>{error}</span>
             </div>
@@ -143,6 +143,7 @@ export const SupplierFormModal: React.FC<SupplierFormModalProps> = ({
               placeholder="e.g. M/S GUPTA SURGICALS / MAA VACCINE"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              data-testid="supplier-name-input"
               required
             />
           </div>
@@ -156,6 +157,7 @@ export const SupplierFormModal: React.FC<SupplierFormModalProps> = ({
                 placeholder="e.g. 10BBHPK9558A1ZX"
                 value={gstin}
                 onChange={(e) => setGstin(e.target.value)}
+                data-testid="supplier-gstin-input"
               />
             </div>
 
@@ -167,6 +169,7 @@ export const SupplierFormModal: React.FC<SupplierFormModalProps> = ({
                 placeholder="Contact number"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
+                data-testid="supplier-phone-input"
               />
             </div>
           </div>
@@ -180,6 +183,7 @@ export const SupplierFormModal: React.FC<SupplierFormModalProps> = ({
                 placeholder="e.g. BBHPK9558A"
                 value={panNo}
                 onChange={(e) => setPanNo(e.target.value)}
+                data-testid="supplier-pan-input"
               />
             </div>
 
@@ -191,6 +195,7 @@ export const SupplierFormModal: React.FC<SupplierFormModalProps> = ({
                 placeholder="e.g. REG-42501"
                 value={drugLicenseNo}
                 onChange={(e) => setDrugLicenseNo(e.target.value)}
+                data-testid="supplier-dl-input"
               />
             </div>
           </div>
@@ -203,6 +208,7 @@ export const SupplierFormModal: React.FC<SupplierFormModalProps> = ({
               rows={2}
               value={address}
               onChange={(e) => setAddress(e.target.value)}
+              data-testid="supplier-address-input"
             />
           </div>
 
@@ -214,6 +220,7 @@ export const SupplierFormModal: React.FC<SupplierFormModalProps> = ({
                 className="form-input"
                 value={stateName}
                 onChange={(e) => setStateName(e.target.value)}
+                data-testid="supplier-state-name-input"
               />
             </div>
 
@@ -224,15 +231,16 @@ export const SupplierFormModal: React.FC<SupplierFormModalProps> = ({
                 className="form-input"
                 value={stateCode}
                 onChange={(e) => setStateCode(e.target.value)}
+                data-testid="supplier-state-code-input"
               />
             </div>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
-            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={submitting}>
+            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={submitting} data-testid="supplier-cancel-btn">
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary" disabled={submitting}>
+            <button type="submit" className="btn btn-primary" disabled={submitting} data-testid="supplier-save-btn">
               {submitting ? 'Saving...' : editingSupplier ? 'Save Supplier Changes' : 'Create & Select Supplier'}
             </button>
           </div>
